@@ -85,3 +85,19 @@ cypress/e2e/
 - Smoke tests
 - Tests XSS
 - Tests fonctionnels critiques
+
+## Documentation
+
+Le bilan de campagne de test est disponible dans :
+
+```text
+/docs/bilan-campagne-test.pdf
+
+
+---
+
+#  Conclusion
+
+Oui :
+```text id="h08m6w"
+mettre le bilan sur GitHub est une bonne pratique
