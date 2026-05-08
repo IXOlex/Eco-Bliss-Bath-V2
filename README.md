@@ -85,3 +85,10 @@ cypress/e2e/
 - Smoke tests
 - Tests XSS
 - Tests fonctionnels critiques
+
+## Documentation
+
+Le bilan de campagne de test est disponible dans :
+
+```text
+/docs/bilan-campagne-test.pdf
