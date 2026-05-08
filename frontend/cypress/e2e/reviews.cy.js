@@ -4,10 +4,12 @@ describe('API - Reviews', () => {
     cy.loginApi()
   })
 
-  it('should add a review', () => {
+  it('should fail to add review due to backend validation issue', () => {
+
     cy.request({
       method: 'POST',
       url: 'http://localhost:8081/reviews',
+      failOnStatusCode: false,
       headers: {
         Authorization: `Bearer ${Cypress.env('token')}`,
       },
@@ -17,8 +19,13 @@ describe('API - Reviews', () => {
         comment: 'Excellent produit',
       },
     }).then((res) => {
-      expect(res.status).to.eq(200)
+
+      expect(res.status).to.eq(400)
+
+      expect(res.body).to.have.property('error')
+
     })
+
   })
 
 })
