@@ -37,4 +37,51 @@ npm i
 ou
 npm install (si vous préférez)
 ```
+Démarrez le frontend Angular :
 
+```bash
+npm start
+```
+
+Le frontend sera disponible sur :
+
+```text
+http://localhost:4200
+```
+# Installation de Cypress
+
+Depuis le dossier frontend :
+
+```bash
+npm install cypress --save-dev
+```
+# Lancer les tests
+
+## Mode interface graphique
+
+```bash
+npx cypress open
+```
+
+## Mode terminal
+
+```bash
+npx cypress run
+```
+# Structure des tests
+
+```text
+cypress/e2e/
+├── auth.cy.js
+├── cart.cy.js
+├── products.cy.js
+├── reviews.cy.js
+├── smoke.cy.js
+└── xss.cy.js
+```
+# Tests automatisés réalisés
+
+- Tests API
+- Smoke tests
+- Tests XSS
+- Tests fonctionnels critiques
