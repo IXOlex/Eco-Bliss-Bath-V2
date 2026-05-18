@@ -27,7 +27,6 @@ describe('API - Products', () => {
             expect(res.status).to.eq(200)
             expect(res.body).to.have.property('id')
             expect(res.body.id).to.eq(product.id)
-
           })
 
       })

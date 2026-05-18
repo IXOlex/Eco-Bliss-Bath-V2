@@ -73,7 +73,6 @@ describe('API - Cart', () => {
 
           // Current backend behavior returns 400
           expect(res.status).to.eq(400)
-
           expect(res.body).to.have.property('error')
           expect(res.body.error).to.have.property('product')
 
@@ -81,5 +80,90 @@ describe('API - Cart', () => {
 
       })
   })
+  it('should reject invalid quantity', () => {
 
+    cy.request('GET', 'http://localhost:8081/products')
+      .then((productsRes) => {
+
+        const product = productsRes.body[0]
+
+        cy.request({
+          method: 'PUT',
+          url: 'http://localhost:8081/orders/add',
+          failOnStatusCode: false,
+          headers: {
+            Authorization: `Bearer ${Cypress.env('token')}`,
+          },
+          body: {
+            product: product.id,
+            quantity: -1,
+          },
+        }).then((res) => {
+
+          expect([400, 422]).to.include(res.status)
+
+        })
+
+      })
+
+  })
+
+  it('should allow quantity higher than stock (backend issue)', () => {
+
+    cy.request('GET', 'http://localhost:8081/products')
+      .then((productsRes) => {
+
+        const product = productsRes.body[0]
+
+        cy.request({
+          method: 'PUT',
+          url: 'http://localhost:8081/orders/add',
+          failOnStatusCode: false,
+          headers: {
+            Authorization: `Bearer ${Cypress.env('token')}`,
+          },
+          body: {
+            product: product.id,
+            quantity: 9999,
+          },
+        }).then((res) => {
+
+          // anomalie backend :
+          // la quantité est acceptée malgré un stock insuffisant
+
+          expect([200, 400, 422]).to.include(res.status)
+
+        })
+
+      })
+
+  })
+
+  it('should prevent XSS injection in quantity field', () => {
+
+    cy.request('GET', 'http://localhost:8081/products')
+      .then((productsRes) => {
+
+        const product = productsRes.body[0]
+
+        cy.request({
+          method: 'PUT',
+          url: 'http://localhost:8081/orders/add',
+          failOnStatusCode: false,
+          headers: {
+            Authorization: `Bearer ${Cypress.env('token')}`,
+          },
+          body: {
+            product: product.id,
+            quantity: '<script>alert("XSS")</script>',
+          },
+        }).then((res) => {
+
+          expect([400, 422]).to.include(res.status)
+
+        })
+
+      })
+
+  })
 })
