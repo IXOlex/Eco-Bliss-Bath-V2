@@ -27,7 +27,7 @@ describe('XSS Test (UI login)', () => {
       .click()
 
     cy.get('[data-cy="review-input-title"]')
-      .type('Test FINAL')
+      .type('alerte XSS')
 
     cy.get('[data-cy="review-input-comment"]')
       .type('<img src="/xxx" onerror="window.location.href=\'https://www.google.com/\'">')
@@ -41,14 +41,16 @@ describe('XSS Test (UI login)', () => {
 
     cy.request('http://localhost:8081/reviews')
       .its('body')
-      .then(body => {
+      .then((reviews) => {
 
-        const xssReview = body.find(
-          review => review.title === 'Test FINAL'
+        const review = reviews.find(
+          r => r.title === 'alerte XSS'
         )
 
-        expect(xssReview).to.not.be.undefined
-        expect(xssReview.title).to.eq('Test FINAL')
+        expect(review).to.not.be.undefined
+
+        expect(review.comment)
+          .to.eq('<img src="/xxx" onerror="window.location.href=\'https://www.google.com/\'">')
 
       })
 
@@ -61,7 +63,6 @@ describe('XSS Test (UI login)', () => {
       }
 
     })
-
   })
-
 })
+
