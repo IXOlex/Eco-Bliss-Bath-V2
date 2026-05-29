@@ -62,6 +62,8 @@ describe('E2E - Cart', () => {
     cy.get('[data-cy="detail-product-quantity"]')
       .should('have.value', '-1')
 
+    cy.get('[data-cy="detail-product-form"]')
+      .should('have.class', 'ng-invalid')
   })
 
   it('should not allow quantity higher than stock (backend issue)', () => {
