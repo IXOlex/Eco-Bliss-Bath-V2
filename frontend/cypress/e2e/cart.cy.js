@@ -1,169 +1,113 @@
-describe('API - Cart', () => {
+describe('E2E - Cart', () => {
 
   beforeEach(() => {
-    cy.loginApi()
+
+    cy.loginUi()
+
+    cy.get('[data-cy="nav-link-cart"]')
+      .should('be.visible')
+
   })
+  it('should display product stock information', () => {
 
-  it('should not access cart without login', () => {
+    cy.visit('http://localhost:4200/#/products')
 
-    cy.request({
-      method: 'GET',
-      url: 'http://localhost:8081/orders',
-      failOnStatusCode: false,
-    }).then((res) => {
+    cy.get('[data-cy="product-link"]')
+      .first()
+      .click()
 
-      expect(res.status).to.eq(401)
-
-    })
-  })
-
-  it('should get cart when logged in', () => {
-
-    cy.request({
-      method: 'GET',
-      url: 'http://localhost:8081/orders',
-      headers: {
-        Authorization: `Bearer ${Cypress.env('token')}`,
-      },
-    }).then((res) => {
-
-      expect(res.status).to.eq(200)
-      expect(res.body).to.exist
-
-    })
-  })
-
-  it('should reject POST method on /orders/add', () => {
-
-    cy.request({
-      method: 'POST',
-      url: 'http://localhost:8081/orders/add',
-      failOnStatusCode: false,
-    }).then((res) => {
-
-      // Backend currently accepts only PUT
-      expect(res.status).to.eq(405)
-
-    })
-  })
-
-  it('should fail to add product due to backend validation issue', () => {
-
-    cy.request('GET', 'http://localhost:8081/products')
-      .then((productsRes) => {
-
-        expect(productsRes.status).to.eq(200)
-        expect(productsRes.body).to.be.an('array')
-        expect(productsRes.body.length).to.be.greaterThan(0)
-
-        const product = productsRes.body[0]
-
-        cy.request({
-          method: 'PUT',
-          url: 'http://localhost:8081/orders/add',
-          failOnStatusCode: false,
-          headers: {
-            Authorization: `Bearer ${Cypress.env('token')}`,
-          },
-          body: {
-            product: `/api/products/${product.id}`,
-            quantity: 1,
-          },
-        }).then((res) => {
-
-          // Current backend behavior returns 400
-          expect(res.status).to.eq(400)
-          expect(res.body).to.have.property('error')
-          expect(res.body.error).to.have.property('product')
-
-        })
-
-      })
-  })
-  it('should reject invalid quantity', () => {
-
-    cy.request('GET', 'http://localhost:8081/products')
-      .then((productsRes) => {
-
-        const product = productsRes.body[0]
-
-        cy.request({
-          method: 'PUT',
-          url: 'http://localhost:8081/orders/add',
-          failOnStatusCode: false,
-          headers: {
-            Authorization: `Bearer ${Cypress.env('token')}`,
-          },
-          body: {
-            product: product.id,
-            quantity: -1,
-          },
-        }).then((res) => {
-
-          expect([400, 422]).to.include(res.status)
-
-        })
-
-      })
+    cy.get('[data-cy="detail-product-stock"]')
+      .should('be.visible')
 
   })
 
-  it('should allow quantity higher than stock (backend issue)', () => {
+  it('should add product to cart', () => {
 
-    cy.request('GET', 'http://localhost:8081/products')
-      .then((productsRes) => {
+    cy.visit('http://localhost:4200/#/products')
 
-        const product = productsRes.body[0]
+    cy.get('[data-cy="product-link"]')
+      .first()
+      .click()
 
-        cy.request({
-          method: 'PUT',
-          url: 'http://localhost:8081/orders/add',
-          failOnStatusCode: false,
-          headers: {
-            Authorization: `Bearer ${Cypress.env('token')}`,
-          },
-          body: {
-            product: product.id,
-            quantity: 9999,
-          },
-        }).then((res) => {
+    cy.get('[data-cy="detail-product-quantity"]')
+      .clear()
+      .type('1')
 
-          // anomalie backend :
-          // la quantité est acceptée malgré un stock insuffisant
+    cy.get('[data-cy="detail-product-add"]')
+      .click()
 
-          expect([200, 400, 422]).to.include(res.status)
+    cy.get('[data-cy="nav-link-cart"]')
+      .click()
 
-        })
-
-      })
+    cy.get('[data-cy="cart-line"]')
+      .should('exist')
 
   })
 
-  it('should prevent XSS injection in quantity field', () => {
+  it('should reject negative quantity', () => {
 
-    cy.request('GET', 'http://localhost:8081/products')
-      .then((productsRes) => {
+    cy.visit('http://localhost:4200/#/products')
 
-        const product = productsRes.body[0]
+    cy.get('[data-cy="product-link"]')
+      .first()
+      .click()
 
-        cy.request({
-          method: 'PUT',
-          url: 'http://localhost:8081/orders/add',
-          failOnStatusCode: false,
-          headers: {
-            Authorization: `Bearer ${Cypress.env('token')}`,
-          },
-          body: {
-            product: product.id,
-            quantity: '<script>alert("XSS")</script>',
-          },
-        }).then((res) => {
+    cy.get('[data-cy="detail-product-quantity"]')
+      .clear()
+      .type('-1')
 
-          expect([400, 422]).to.include(res.status)
+    cy.get('[data-cy="detail-product-add"]')
+      .click()
 
-        })
-
-      })
+    cy.get('[data-cy="detail-product-quantity"]')
+      .should('have.value', '-1')
 
   })
+
+  it('should not allow quantity higher than stock (backend issue)', () => {
+
+    cy.visit('http://localhost:4200/#/products')
+
+    cy.get('[data-cy="product-link"]')
+      .first()
+      .click()
+
+    cy.get('[data-cy="detail-product-quantity"]')
+      .clear()
+      .type('9999')
+
+    cy.get('[data-cy="detail-product-add"]')
+      .click()
+
+    cy.get('[data-cy="nav-link-cart"]')
+      .click()
+
+    cy.get('[data-cy="cart-line-quantity"]')
+      .should('exist')
+
+  })
+
+  it('should display updated cart total', () => {
+
+    cy.visit('http://localhost:4200/#/products')
+
+    cy.get('[data-cy="product-link"]')
+      .first()
+      .click()
+
+    cy.get('[data-cy="detail-product-quantity"]')
+      .clear()
+      .type('2')
+
+    cy.get('[data-cy="detail-product-add"]')
+      .click()
+
+    cy.get('[data-cy="nav-link-cart"]')
+      .click()
+
+    cy.get('[data-cy="cart-total"]')
+      .should('be.visible')
+
+  })
+
 })

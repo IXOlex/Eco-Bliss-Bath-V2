@@ -1,41 +1,27 @@
 describe('Smoke Tests', () => {
 
-  it('should load homepage', () => {
+  it('should load homepage and display login button', () => {
 
     cy.visit('http://localhost:4200')
 
-    // Vérifie que la page charge correctement
-    cy.contains('Connexion')
-
-  })
-
-  it('should display login button', () => {
-
-    cy.visit('http://localhost:4200')
-
-    cy.contains('Connexion')
+    cy.get('[data-cy="nav-link-login"]')
+      .should('be.visible')
 
   })
 
   it('should display cart button when logged in', () => {
 
-    cy.visit('http://localhost:4200')
+    cy.loginUi()
 
-    cy.contains('Connexion').click()
+    cy.url()
+      .should('include', '/#/')
 
-    cy.get('input').eq(0).type('test2@test.fr')
-    cy.get('input').eq(1).type('testtest')
+    cy.get('[data-cy="nav-link-logout"]')
+      .should('be.visible')
 
-    cy.contains('button', 'Se connecter').click()
-
-    // Vérifie redirection après login
-    cy.url().should('include', '/#/')
-
-    // Vérifie état connecté
-    cy.contains('Déconnexion')
+    cy.get('[data-cy="nav-link-cart"]')
+      .should('be.visible')
 
   })
 
 })
-
-
