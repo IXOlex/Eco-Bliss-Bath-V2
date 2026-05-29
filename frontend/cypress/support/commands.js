@@ -16,7 +16,7 @@ Cypress.Commands.add('loginUi', () => {
 
   cy.visit('http://localhost:4200')
 
-  cy.get('[data-cy="nav-link-login"]')
+  cy.get('[ng-reflect-router-link="/login"]')
     .click()
 
   cy.get('[data-cy="login-input-username"]')

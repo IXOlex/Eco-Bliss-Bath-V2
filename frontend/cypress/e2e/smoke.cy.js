@@ -1,26 +1,35 @@
-describe('Smoke Tests', () => {
+describe('Smoke - Login page', () => {
 
-  it('should load homepage and display login button', () => {
+  it('should display login fields and button', () => {
 
-    cy.visit('http://localhost:4200')
+    cy.visit('http://localhost:4200/#/login')
 
-    cy.get('[data-cy="nav-link-login"]')
+    cy.get('[data-cy="login-input-username"]')
+      .should('be.visible')
+
+    cy.get('[data-cy="login-input-password"]')
+      .should('be.visible')
+
+    cy.get('[data-cy="login-submit"]')
       .should('be.visible')
 
   })
+})
+describe('Smoke - Product page', () => {
 
-  it('should display cart button when logged in', () => {
+  beforeEach(() => {
 
     cy.loginUi()
 
-    cy.url()
-      .should('include', '/#/')
+  })
 
-    cy.get('[data-cy="nav-link-logout"]')
-      .should('be.visible')
+  it('should display add to cart button when connected', () => {
 
-    cy.get('[data-cy="nav-link-cart"]')
-      .should('be.visible')
+    cy.visit('http://localhost:4200/#/products/6')
+
+    cy.get('[data-cy="detail-product-add"]')
+      .should('exist')
+      .and('be.visible')
 
   })
 
